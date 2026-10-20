@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <meta name="referrer" content="no-referrer">
+<meta name="bot-open-relay" content="1">
 <title>開く</title>
 <style>
   :root { color-scheme: light dark; }
@@ -23,7 +24,7 @@
   var SCRIPT = "BotHTML";
   var q = new URLSearchParams(location.search);
   var f = q.get("f") || "";
-  var ok = /^[A-Za-z0-9_-]+(\/[A-Za-z0-9_-]+)*\/[A-Za-z0-9][A-Za-z0-9_-]*\.html$/.test(f) && f.indexOf("..") < 0;
+  var ok = /^[a-z0-9][a-z0-9_-]{0,39}(\/[A-Za-z0-9_-]{1,40})?\/[A-Za-z0-9][A-Za-z0-9_-]{0,119}\.html$/.test(f);
   var msg = document.getElementById("msg"), go = document.getElementById("go"), st = document.getElementById("st");
   if (!ok) {
     msg.className = "err";
@@ -33,18 +34,23 @@
     var url = "scriptable:///run/" + encodeURIComponent(SCRIPT) + "?file=" + encodeURIComponent(f);
     go.href = url;
     msg.textContent = f + " を開きます。";
-    setTimeout(function () { location.href = url; }, 50);
   }
   st.textContent = navigator.onLine ? "通信：あり" : "通信：なし（保存済みのページで動いています）";
+  // 保存（サービスワーカー）の準備を最大0.8秒待ってから移る。初めて開いたときにも保存が終わるようにするため
+  var moved = false;
+  function go2() { if (ok && !moved) { moved = true; location.href = go.href; } }
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js").then(function () {
       st.textContent += "／保存：有効";
-    }).catch(function () {
+      return navigator.serviceWorker.ready;
+    }).then(go2).catch(function () {
       st.textContent += "／保存：使えない";
+      go2();
     });
   } else {
     st.textContent += "／保存：この画面では使えない";
   }
+  setTimeout(go2, 800);
 })();
 </script>
 </body>
