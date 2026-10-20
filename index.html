@@ -20,10 +20,10 @@
 <p class="note" id="st"></p>
 <script>
 (function () {
-  var SCRIPT = "BotHTML-test";
+  var SCRIPT = "BotHTML";
   var q = new URLSearchParams(location.search);
   var f = q.get("f") || "";
-  var ok = /^[A-Za-z0-9_\-\/]+\.html$/.test(f) && f.indexOf("..") < 0 && f.charAt(0) !== "/";
+  var ok = /^[A-Za-z0-9_-]+(\/[A-Za-z0-9_-]+)*\/[A-Za-z0-9][A-Za-z0-9_-]*\.html$/.test(f) && f.indexOf("..") < 0;
   var msg = document.getElementById("msg"), go = document.getElementById("go"), st = document.getElementById("st");
   if (!ok) {
     msg.className = "err";
