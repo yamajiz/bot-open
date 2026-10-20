@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<title>開く</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { font-family: -apple-system, sans-serif; margin: 0; padding: 24px 16px; line-height: 1.6; background: Canvas; color: CanvasText; }
+  a.btn { display: block; text-align: center; padding: 18px; border-radius: 14px; background: #0a84ff; color: #fff; font-size: 20px; font-weight: 600; text-decoration: none; margin: 16px 0; }
+  .note { font-size: 14px; opacity: .7; }
+  .err { color: #d70015; font-weight: 600; }
+</style>
+</head>
+<body>
+<p id="msg">開いています…</p>
+<a class="btn" id="go" href="#">Scriptable で開く</a>
+<p class="note" id="st"></p>
+<script>
+(function () {
+  var SCRIPT = "BotHTML-test";
+  var q = new URLSearchParams(location.search);
+  var f = q.get("f") || "";
+  var ok = /^[A-Za-z0-9_\-\/]+\.html$/.test(f) && f.indexOf("..") < 0 && f.charAt(0) !== "/";
+  var msg = document.getElementById("msg"), go = document.getElementById("go"), st = document.getElementById("st");
+  if (!ok) {
+    msg.className = "err";
+    msg.textContent = "リンクの形が正しくありません。";
+    go.style.display = "none";
+  } else {
+    var url = "scriptable:///run/" + encodeURIComponent(SCRIPT) + "?file=" + encodeURIComponent(f);
+    go.href = url;
+    msg.textContent = f + " を開きます。";
+    setTimeout(function () { location.href = url; }, 50);
+  }
+  st.textContent = navigator.onLine ? "通信：あり" : "通信：なし（保存済みのページで動いています）";
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js").then(function () {
+      st.textContent += "／保存：有効";
+    }).catch(function () {
+      st.textContent += "／保存：使えない";
+    });
+  } else {
+    st.textContent += "／保存：この画面では使えない";
+  }
+})();
+</script>
+</body>
+</html>
